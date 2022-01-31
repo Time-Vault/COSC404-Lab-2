@@ -1,0 +1,34 @@
+version: '3.8'
+services:             
+    cosc404-lab2-mysql:
+        image: mysql:8.0
+        container_name: cosc404-lab2-mysql
+        restart: always
+        environment:
+            MYSQL_DATABASE: 'lab2'
+            MYSQL_USER: 'testuser'
+            MYSQL_PASSWORD: '404testpw'            
+            MYSQL_ROOT_PASSWORD: '404rootpw'
+        ports:
+            - '3306:3306'
+        expose:
+            - '3306'
+        volumes:
+            - mysql-db:/var/lib/mysql
+    cosc404-lab1-postgres:
+        image: postgres:14
+        container_name: cosc404-lab2-postgres
+        restart: always
+        environment:
+            POSTGRES_DB: 'lab2'
+            POSTGRES_USER: 'testuser'
+            POSTGRES_PASSWORD: '404postgrespw'                        
+        ports:
+            - '5432:5432'
+        expose:
+            - '5432'
+        volumes:
+            - postgres-db:/var/lib/postgresql/data
+volumes:     
+    mysql-db:
+    postgres-db:
