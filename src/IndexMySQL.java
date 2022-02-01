@@ -55,7 +55,10 @@ public class IndexMySQL
 		System.out.println("Connecting to database.");
 		// Note: Must assign connection to instance variable as well as returning it back to the caller
 		// TODO: Make a connection to the database and store connection in con variable before returning it.
-		return null;  	                       
+
+		con = DriverManager.getConnection(url, uid, pw);
+
+		return con;  	                       
 	}
 	
 	/**
@@ -64,7 +67,14 @@ public class IndexMySQL
 	public void close()
 	{
 		System.out.println("Closing database connection.");
-		// TODO: Close the database connection.  Catch any exception and print out if it occurs.		
+		// TODO: Close the database connection.  Catch any exception and print out if it occurs.	
+		
+		try {
+			con.close();
+		} catch (SQLException e) {
+			//TODO: handle exception
+			System.out.println(e);
+		}
 	}
 	
 	/**
@@ -74,7 +84,21 @@ public class IndexMySQL
 	{
 		System.out.println("Dropping table bench.");
 		// TODO: Drop the table bench.  Catch any exception and print out if it occurs.	
+
+		String sql = "DROP TABLE bench";
+
+		try {
+			Statement rst = con.createStatement();
+			rst.executeUpdate(sql);
+		} catch (SQLException e) {
+			//TODO: handle exception
+			System.out.println(e);
+		}
+
+
+
 	}
+
 	
 	/**
 	 * Creates the table in the database.  Table name: bench
@@ -87,7 +111,12 @@ public class IndexMySQL
 	public void create() throws SQLException
 	{
 		System.out.println("Creating table bench.");
-		// TODO: Create the table bench.			
+		// TODO: Create the table bench.
+			String sql = "CREATE TABLE bench (id int AUTO_INCREMENT, val1 int, val2 int AS  (MOD(val1,10)), str1 varchar(20) AS (CONCAT(\"Test\",val1)), PRIMARY KEY(id));";	
+			Statement rst = con.createStatement();
+			rst.executeUpdate(sql);
+			
+		
 	}
 	
 	/**
@@ -99,6 +128,15 @@ public class IndexMySQL
 	{
 		System.out.println("Inserting records.");		
 		// TODO: Insert records		
+
+		String sql = "INSERT INTO bench (val1) VALUES (?)";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+
+		for (int i = 1; i < numRecords + 1; i++) {
+			pstmt.setInt(1, i);
+			pstmt.executeUpdate();
+		}
 	}
 	
 	/**
@@ -114,7 +152,15 @@ public class IndexMySQL
 		System.out.println("Building index #1.");
 		// TODO: Create index
 		
+		String sql = "CREATE UNIQUE INDEX indx1 ON bench (val1)";
+
+		Statement rst = con.createStatement();
+
+		rst.executeUpdate(sql);
+
 		// TODO: Do explain with query: SELECT * FROM bench WHERE val1 = 500
+
+		 sql = "EXPLAIN SELECT * FROM bench WHERE val1 = 500";
 		return null;	
 	}
 	

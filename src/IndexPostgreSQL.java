@@ -55,7 +55,14 @@ public class IndexPostgreSQL
 		System.out.println("Connecting to database.");
 		// Note: Must assign connection to instance variable as well as returning it back to the caller
 		// TODO: Make a connection to the database and store connection in con variable before returning it.
-		return null;	                       
+		try {
+			con = DriverManager.getConnection(url, uid, pw);
+			System.out.println("\tConnection Successful.");
+		} catch (Exception e) {
+			System.out.println("\tConnection Failed.");
+			System.out.println(e);
+		}
+		return con;	                       
 	}
 	
 	/**
@@ -64,7 +71,17 @@ public class IndexPostgreSQL
 	public void close()
 	{
 		System.out.println("Closing database connection.");
-		// TODO: Close the database connection.  Catch any exception and print out if it occurs.			
+		// TODO: Close the database connection.  Catch any exception and print out if it occurs.	
+		try {
+			if (con != null) {
+				con.close();
+				con = null;
+				System.out.println("\tClosed gracefully.");
+			}
+		} catch (Exception e) {
+			System.out.println("\tCould not close gracefully.");
+			System.out.println(e);
+		}			
 	}
 	
 	/**
@@ -73,7 +90,16 @@ public class IndexPostgreSQL
 	public void drop()
 	{
 		System.out.println("Dropping table bench.");
-		// TODO: Drop the table bench.  Catch any exception and print out if it occurs.			
+		// TODO: Drop the table bench.  Catch any exception and print out if it occurs.	
+		try {
+			Statement dropState = con.createStatement();
+			dropState.executeUpdate("DROP TABLE bench;");
+			System.out.println("\tTable dropped.");
+			dropState.close();
+		} catch (SQLException e) {
+			System.out.println("\tNo table to drop.");
+			System.out.println("\t"+e);
+		}		
 	}
 	
 	/**
@@ -87,7 +113,11 @@ public class IndexPostgreSQL
 	public void create() throws SQLException
 	{
 		System.out.println("Creating table bench.");
-		// TODO: Create the table bench.			
+		// TODO: Create the table bench.	
+		
+			Statement createState = con.createStatement();
+			createState.executeUpdate("CREATE TABLE bench (id serial primary key, val1 integer, val2 integer GENERATED ALWAYS AS (MOD(val1,10)) STORED, str1 varchar(20) GENERATED ALWAYS AS (CASE WHEN val1 IS NULL THEN 'test' ELSE 'Test' || val1) STORED);");
+			System.out.println("\tTable created.");
 	}
 	
 	/**
@@ -96,7 +126,13 @@ public class IndexPostgreSQL
 	public void insert(int numRecords) throws SQLException
 	{
 		System.out.println("Inserting records.");
-		// TODO: Insert records		
+		// TODO: Insert records	
+		PreparedStatement insertState = con.prepareStatement("INSERT INTO bench (val1) VALUES (?);");
+		for (int i = 1; i<=numRecords;i++){
+			insertState.setInt(1, i);
+			insertState.executeUpdate();
+		}
+		insertState.close();
 	}
 	
 	/**
@@ -111,9 +147,11 @@ public class IndexPostgreSQL
 	{
 		System.out.println("Building index #1.");
 		// TODO: Create index
-		
+		Statement index1 = con.createStatement();
+		index1.executeUpdate("CREATE INDEX index1 ON test (val1);");
+
 		// TODO: Do explain with query: SELECT * FROM bench WHERE val1 = 500
-		return null;	
+		return index1.executeQuery("EXPLAIN SELECT * FROM bench WHERE val1 = 500;");	
 	}
 	
 	/**
@@ -128,9 +166,11 @@ public class IndexPostgreSQL
 	{
 		System.out.println("Building index #2.");
 		// TODO: Create index
-		
+		Statement index2 = con.createStatement();
+		index2.executeUpdate("CREATE INDEX index2 ON test (val1,val2);");
+
 		// TODO: Do explain with query: SELECT * FROM bench WHERE val2 = 0 and val1 > 100;
-		return null;	
+		return index2.executeQuery("EXPLAIN SELECT * FROM bench WHERE val2 = 0 and val1 > 100;");	
 	}
 	
 	/*
