@@ -32,7 +32,7 @@ public class IndexPostgreSQL
 		q.connect();	
 		q.drop();
 		q.create();
-		q.insert(10000);	
+		q.insert(10000);
 		q.addindex1();	
 		q.addindex2();			
 		q.close();
@@ -116,7 +116,7 @@ public class IndexPostgreSQL
 		// TODO: Create the table bench.	
 		
 			Statement createState = con.createStatement();
-			createState.executeUpdate("CREATE TABLE bench (id serial primary key, val1 integer, val2 integer GENERATED ALWAYS AS (MOD(val1,10)) STORED, str1 varchar(20) GENERATED ALWAYS AS (CASE WHEN val1 IS NULL THEN 'test' ELSE 'Test' || val1) STORED);");
+			createState.executeUpdate("CREATE TABLE bench (id serial primary key, val1 integer, val2 integer GENERATED ALWAYS AS (MOD(val1,10)) STORED, str1 varchar(20) GENERATED ALWAYS AS ('Test'||val1::varchar(10)) STORED);");
 			System.out.println("\tTable created.");
 	}
 	
@@ -148,7 +148,7 @@ public class IndexPostgreSQL
 		System.out.println("Building index #1.");
 		// TODO: Create index
 		Statement index1 = con.createStatement();
-		index1.executeUpdate("CREATE INDEX index1 ON test (val1);");
+		index1.executeUpdate("CREATE UNIQUE INDEX idxbenchval1 ON bench (val1);");
 
 		// TODO: Do explain with query: SELECT * FROM bench WHERE val1 = 500
 		return index1.executeQuery("EXPLAIN SELECT * FROM bench WHERE val1 = 500;");	
@@ -167,7 +167,7 @@ public class IndexPostgreSQL
 		System.out.println("Building index #2.");
 		// TODO: Create index
 		Statement index2 = con.createStatement();
-		index2.executeUpdate("CREATE INDEX index2 ON test (val1,val2);");
+		index2.executeUpdate("CREATE INDEX idxBenchVal2Val1 ON bench (val2,val1);");
 
 		// TODO: Do explain with query: SELECT * FROM bench WHERE val2 = 0 and val1 > 100;
 		return index2.executeQuery("EXPLAIN SELECT * FROM bench WHERE val2 = 0 and val1 > 100;");	
