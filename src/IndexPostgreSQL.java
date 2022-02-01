@@ -127,12 +127,23 @@ public class IndexPostgreSQL
 	{
 		System.out.println("Inserting records.");
 		// TODO: Insert records	
-		PreparedStatement insertState = con.prepareStatement("INSERT INTO bench (val1) VALUES (?);");
-		for (int i = 1; i<=numRecords;i++){
-			insertState.setInt(1, i);
-			insertState.executeUpdate();
+		
+		String sql = "INSERT INTO bench (val1)";
+
+		for (int i = 1; i <= numRecords ; i++) {
+			if (i == 1) {
+				sql += " VALUES (?)";
+				System.out.println(sql);
+			} else {
+				sql += ",(?)";
+			}
 		}
-		insertState.close();
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		for (int j = 1; j <= numRecords; j++) 
+			pstmt.setInt(j, j);
+		
+		pstmt.executeUpdate();
 	}
 	
 	/**

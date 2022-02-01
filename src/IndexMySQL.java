@@ -112,9 +112,9 @@ public class IndexMySQL
 	{
 		System.out.println("Creating table bench.");
 		// TODO: Create the table bench.
-			String sql = "CREATE TABLE bench (id int AUTO_INCREMENT, val1 int, val2 int AS  (MOD(val1,10)), str1 varchar(20) AS (CONCAT(\"Test\",val1)), PRIMARY KEY(id));";	
-			Statement rst = con.createStatement();
-			rst.executeUpdate(sql);
+		String sql = "CREATE TABLE bench (id int AUTO_INCREMENT, val1 int, val2 int AS  (MOD(val1,10)), str1 varchar(20) AS (CONCAT(\"Test\",val1)), PRIMARY KEY(id));";	
+		Statement rst = con.createStatement();
+		rst.executeUpdate(sql);
 			
 		
 	}
@@ -128,15 +128,22 @@ public class IndexMySQL
 	{
 		System.out.println("Inserting records.");		
 		// TODO: Insert records		
+		String sql = "INSERT INTO bench (val1)";
 
-		String sql = "INSERT INTO bench (val1) VALUES (?)";
-		
-		PreparedStatement pstmt = con.prepareStatement(sql);
-
-		for (int i = 1; i < numRecords + 1; i++) {
-			pstmt.setInt(1, i);
-			pstmt.executeUpdate();
+		for (int i = 1; i <= numRecords ; i++) {
+			if (i == 1) {
+				sql += " VALUES (?)";
+				System.out.println(sql);
+			} else {
+				sql += ",(?)";
+			}
 		}
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		for (int j = 1; j <= numRecords; j++) 
+			pstmt.setInt(j, j);
+		
+		pstmt.executeUpdate();
 	}
 	
 	/**
@@ -150,18 +157,16 @@ public class IndexMySQL
 	public ResultSet addindex1() throws SQLException
 	{
 		System.out.println("Building index #1.");
-		// TODO: Create index
 		
-		String sql = "CREATE UNIQUE INDEX indx1 ON bench (val1)";
-
-		Statement rst = con.createStatement();
-
-		rst.executeUpdate(sql);
+		// TODO: Create index
+		String sql = "CREATE UNIQUE INDEX idxBenchVal1 ON bench (val1)";
+		Statement index1 = con.createStatement();
+		index1.executeUpdate(sql);
 
 		// TODO: Do explain with query: SELECT * FROM bench WHERE val1 = 500
-
 		 sql = "EXPLAIN SELECT * FROM bench WHERE val1 = 500";
-		return null;	
+		return index1.executeQuery(sql);
+			
 	}
 	
 	/**
@@ -176,9 +181,13 @@ public class IndexMySQL
 	{
 		System.out.println("Building index #2.");
 		// TODO: Create index
-		
+		String sql = "CREATE INDEX idxBenchVal2Val1 ON bench (val2,val1);";
+		Statement index2 = con.createStatement();
+		index2.executeUpdate(sql);
+		index2.executeUpdate("SET optimizer_switch = \'index_condition_pushdown=on\'");
 		// TODO: Do explain with query: SELECT * FROM bench WHERE val2 = 0 and val1 > 100;
-		return null;	
+		sql = "EXPLAIN SELECT * FROM bench WHERE val2 = 0 and val1 > 100";
+		return index2.executeQuery(sql);	
 	}
 	
 	
