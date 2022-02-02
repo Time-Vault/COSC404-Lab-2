@@ -95,11 +95,8 @@ public class IndexMySQL
 			System.out.println(e);
 		}
 
-
-
 	}
 
-	
 	/**
 	 * Creates the table in the database.  Table name: bench
 	 * Fields:
